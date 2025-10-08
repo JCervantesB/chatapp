@@ -7,15 +7,14 @@ import type { ChatCompletionMessageParam } from 'openai/resources/chat/completio
 import { buildAgentSystemPrompt, buildInitialUserInstruction } from '@/lib/prompts'
 import { auth } from '@/lib/auth'
 
-// Initialize OpenAI with OpenRouter configuration
+// Asegurar runtime Node para soporte de librerías y headers
+export const runtime = 'nodejs'
+
+// Initialize OpenAI SDK pointing to Venice AI API
+// Docs: https://docs.venice.ai/api-reference/endpoint/chat/completions
 const openai = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENROUTER_API_KEY || 'sk-or-v1-...', // You should set this in your .env file
-  defaultHeaders: {
-    'HTTP-Referer': process.env.SITE_URL || 'http://localhost:3000', // Optional. Site URL for rankings on openrouter.ai
-    'X-Title': process.env.SITE_NAME || 'AI Agents Chat', // Optional. Site title for rankings on openrouter.ai
-  },
-  dangerouslyAllowBrowser: true // Only for development, in production you should handle this server-side
+  baseURL: 'https://api.venice.ai/api/v1',
+  apiKey: process.env.VENICE_API_KEY || 'sk-venice-...', // Configura VENICE_API_KEY en tu .env
 })
 
 export async function GET(request: NextRequest) {
@@ -138,10 +137,10 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Get AI response using OpenRouter
+    // Obtener respuesta de IA usando Venice AI
     try {
       const completion = await openai.chat.completions.create({
-        model: process.env.OPENROUTER_MODEL || 'cognitivecomputations/dolphin-mistral-24b-venice-edition:free',
+        model: process.env.VENICE_MODEL || 'venice-uncensored',
         messages: messages,
         temperature: 0.7,
         max_tokens: 1000,
