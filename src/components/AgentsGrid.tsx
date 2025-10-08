@@ -37,6 +37,10 @@ export function AgentsGrid({ agents, onCreateFirstAgent, onChat, onEdit, onDelet
   const [currentPage, setCurrentPage] = React.useState(1)
   const pageSize = 9
 
+  // Estado para diálogo de confirmación de borrado
+  const [isDeleteOpen, setIsDeleteOpen] = React.useState(false)
+  const [agentToDelete, setAgentToDelete] = React.useState<Agent | null>(null)
+
   const totalPages = Math.max(1, Math.ceil((agents?.length || 0) / pageSize))
 
   React.useEffect(() => {
@@ -127,28 +131,13 @@ export function AgentsGrid({ agents, onCreateFirstAgent, onChat, onEdit, onDelet
                       <Edit className="h-4 w-4 mr-2" />
                       Editar
                     </DropdownMenuItem>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <DropdownMenuItem className="text-red-600">
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Eliminar
-                        </DropdownMenuItem>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>¿Eliminar agente?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Esta acción es permanente. Se borrará el agente y su historial de chat.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => onDelete(agent.id)} className="bg-red-600 hover:bg-red-700 text-white">
-                            Confirmar eliminación
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    <DropdownMenuItem
+                      className="text-red-600"
+                      onClick={() => { setAgentToDelete(agent); setIsDeleteOpen(true) }}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Eliminar
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -216,6 +205,32 @@ export function AgentsGrid({ agents, onCreateFirstAgent, onChat, onEdit, onDelet
           </Button>
         </div>
       )}
+      {/* Diálogo de confirmación global */}
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar agente{agentToDelete?.name ? ` "${agentToDelete.name}"` : ''}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción es permanente. Se borrará el agente y su historial de chat.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => { setIsDeleteOpen(false); setAgentToDelete(null) }}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (agentToDelete) {
+                  onDelete(agentToDelete.id)
+                }
+                setIsDeleteOpen(false)
+                setAgentToDelete(null)
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Confirmar eliminación
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
