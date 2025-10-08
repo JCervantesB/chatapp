@@ -2,20 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { schema } from '@/db'
 import { asc, eq, and, ne } from 'drizzle-orm'
-import OpenAI from 'openai'
-import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
+// Tipado local de mensajes para Venice
+type VeniceMessage = {
+  role: 'system' | 'user' | 'assistant'
+  content: string
+}
 import { buildAgentSystemPrompt, buildInitialUserInstruction } from '@/lib/prompts'
 import { auth } from '@/lib/auth'
 
 // Asegurar runtime Node para soporte de librerías y headers
 export const runtime = 'nodejs'
 
-// Initialize OpenAI SDK pointing to Venice AI API
-// Docs: https://docs.venice.ai/api-reference/endpoint/chat/completions
-const openai = new OpenAI({
-  baseURL: 'https://api.venice.ai/api/v1',
-  apiKey: process.env.VENICE_API_KEY || 'sk-venice-...', // Configura VENICE_API_KEY en tu .env
-})
+// Peticiones directas al endpoint Venice Chat Completions usando fetch
+// Docs: https://api.venice.ai/api/v1/chat/completions
 
 export async function GET(request: NextRequest) {
   try {
@@ -114,12 +113,12 @@ export async function POST(request: NextRequest) {
     }, userName)
 
     // Prepare messages for AI; ensure roles are valid union
-    const messages: ChatCompletionMessageParam[] = [
+    const messages: VeniceMessage[] = [
       {
         role: 'system',
         content: enhancedSystemPrompt,
       },
-      ...conversationHistory.map((msg): ChatCompletionMessageParam => ({
+      ...conversationHistory.map((msg): VeniceMessage => ({
         role: (msg.role === 'user' || msg.role === 'assistant' ? msg.role : 'assistant'),
         content: msg.content,
       })),
@@ -139,14 +138,34 @@ export async function POST(request: NextRequest) {
 
     // Obtener respuesta de IA usando Venice AI
     try {
-      const completion = await openai.chat.completions.create({
-        model: process.env.VENICE_MODEL || 'venice-uncensored',
-        messages: messages,
-        temperature: 0.7,
-        max_tokens: 1000,
+      const apiKey = process.env.VENICE_API_KEY
+      if (!apiKey) {
+        throw new Error('VENICE_API_KEY is not configured')
+      }
+
+      const res = await fetch('https://api.venice.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: process.env.VENICE_MODEL || 'venice-uncensored',
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: 1000,
+          stream: false,
+        }),
       })
 
-      let aiResponse = completion.choices[0]?.message?.content
+      if (!res.ok) {
+        const text = await res.text()
+        throw new Error(`Venice API error ${res.status}: ${text}`)
+      }
+
+      const completion = await res.json()
+
+      let aiResponse = completion?.choices?.[0]?.message?.content
 
       if (!aiResponse) {
         throw new Error('No response from AI')
@@ -171,7 +190,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         response: aiResponse,
-        messageId: completion.id
+        messageId: completion?.id ?? undefined,
       })
 
     } catch (aiError) {
