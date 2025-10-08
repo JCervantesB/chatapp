@@ -301,15 +301,9 @@ export default function ChatPage() {
           {/* Input Area */}
           <div className="mt-4 flex space-x-2">
             <Textarea
-              placeholder="Escribe tu mensaje... (Shift+Enter: nueva línea)"
+              placeholder="Escribe tu mensaje... (Enter: nueva línea, usa el botón Enviar)"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  sendMessage()
-                }
-              }}
               disabled={isLoadingChat}
               className="flex-1"
               rows={3}
