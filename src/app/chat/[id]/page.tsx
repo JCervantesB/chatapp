@@ -214,7 +214,7 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 fixed top-0 inset-x-0 z-40">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -243,7 +243,7 @@ export default function ChatPage() {
       </div>
 
       {/* Chat Container */}
-      <div className="max-w-7xl mx-auto p-3 sm:p-6">
+      <div className="max-w-7xl mx-auto p-3 sm:p-6 pt-20">
         <div className="flex flex-col h-[calc(100vh-200px)]">
           {/* Messages Area */}
           <Card className="flex-1 flex flex-col">
@@ -275,6 +275,8 @@ export default function ChatPage() {
                           content={message.content} 
                           isAgent={message.role === 'assistant'} 
                           agentId={agent.id}
+                          messageId={message.id}
+                          onRefresh={loadChatMessages}
                         />
                         <p className="text-xs opacity-70 mt-1">
                           {new Date(message.createdAt).toLocaleTimeString()}

@@ -12,6 +12,8 @@ interface MessageContentProps {
   content: string
   isAgent: boolean
   agentId?: string
+  messageId?: string
+  onRefresh?: () => void | Promise<void>
 }
 
 const SINKIN_MODELS = [
@@ -28,11 +30,13 @@ const SINKIN_MODELS = [
   { id: 'vl5nZmX', name: 'Animagine XL' },
 ]
 
-export function MessageContent({ content, isAgent, agentId }: MessageContentProps) {
+export function MessageContent({ content, isAgent, agentId, messageId, onRefresh }: MessageContentProps) {
   const [selectedModel, setSelectedModel] = useState('JWknjgr')
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null)
   const [isImageExpanded, setIsImageExpanded] = useState(false)
+  const [isEditingPrompt, setIsEditingPrompt] = useState(false)
+  const [editedPrompt, setEditedPrompt] = useState('')
 
   // Renderizador de contenido formateado por líneas:
   // *Acciones* -> estilo de pensamiento (italics, fondo sutil)
@@ -132,6 +136,40 @@ export function MessageContent({ content, isAgent, agentId }: MessageContentProp
 
   const [, beforeImagen, imagenLabel, imagePrompt] = imagenMatch
   const cleanPrompt = imagePrompt.trim()
+  const canEditPrompt = Boolean(isAgent && messageId)
+
+  const openEditPrompt = () => {
+    setEditedPrompt(cleanPrompt)
+    setIsEditingPrompt(true)
+    setIsImageExpanded(true)
+  }
+
+  const saveEditedPrompt = async () => {
+    const newPrompt = editedPrompt.trim()
+    if (!newPrompt || !canEditPrompt || !messageId) {
+      toast.error('No se puede guardar: faltan datos')
+      return
+    }
+    try {
+      const resp = await fetch('/api/chat', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messageId, newImagePrompt: newPrompt }),
+      })
+      if (resp.ok) {
+        toast.success('Prompt IMAGEN actualizado')
+        setIsEditingPrompt(false)
+        if (onRefresh) {
+          await onRefresh()
+        }
+      } else {
+        const err = await resp.json().catch(() => ({}))
+        toast.error(`Error al guardar: ${err.error || 'Error desconocido'}`)
+      }
+    } catch (e) {
+      toast.error('Error de red al guardar el prompt')
+    }
+  }
 
   const handleGenerateImage = async () => {
     if (!cleanPrompt || isGenerating) return
@@ -195,14 +233,43 @@ export function MessageContent({ content, isAgent, agentId }: MessageContentProp
               >
                 {isImageExpanded ? 'Ocultar' : 'Mostrar'}
               </Button>
+              {canEditPrompt && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs ml-2"
+                  onClick={openEditPrompt}
+                >
+                  Editar
+                </Button>
+              )}
             </div>
 
             {/* Contenido del bloque IMAGEN (prompt + controles) */}
             {isImageExpanded && (
               <>
-                <div>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{cleanPrompt}</p>
-                </div>
+                {!isEditingPrompt ? (
+                  <div>
+                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{cleanPrompt}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">Editar prompt IMAGEN</p>
+                    <textarea
+                      className="w-full h-24 text-xs p-2 border rounded-md bg-background"
+                      value={editedPrompt}
+                      onChange={(e) => setEditedPrompt(e.target.value)}
+                    />
+                    <div className="flex gap-2">
+                      <Button size="sm" className="h-8 text-xs" onClick={saveEditedPrompt} disabled={!editedPrompt.trim()}>
+                        Guardar
+                      </Button>
+                      <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setIsEditingPrompt(false)}>
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center gap-3 pt-2 border-t border-border">
                   <Select value={selectedModel} onValueChange={setSelectedModel}>
                     <SelectTrigger className="w-48 h-8 text-xs">
