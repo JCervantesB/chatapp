@@ -110,6 +110,7 @@ export async function POST(request: NextRequest) {
       scenario: agent.scenario ?? null,
       enhancers: agent.enhancers ?? null,
       initialStory: agent.initialStory ?? null,
+      imagePromptMaster: agent.imagePromptMaster ?? null,
     }, userName)
 
     // Prepare messages for AI; ensure roles are valid union

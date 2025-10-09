@@ -264,6 +264,7 @@ export interface AgentSystemConfig {
   scenario?: string | null
   enhancers?: string[] | string | null
   initialStory?: string | null
+  imagePromptMaster?: string | null
 }
 
 export function normalizeEnhancers(enhancers?: string[] | string | null): string[] {
@@ -317,19 +318,20 @@ export function buildAgentSystemPrompt(
 
   const userRef = userName
   const style = extractImageStyle(agent.systemPrompt) || 'pixel art, retro 8-bit style'
+  const imagePromptMaster = (agent.imagePromptMaster || '').trim()
 
   const introStory = agent.initialStory ? `\nESCENA INICIAL SUGERIDA:\n${agent.initialStory}\n` : ''
   return `Eres ${agent.name} ({{name}}), ${agent.description}.
 
 INSTRUCCIONES DEL AGENTE:
-- Siempre refiérete a ti mismo como "${agent.name}" y mantén coherencia con tu personalidad.
+- Siempre refiérete a ti mismo como "${agent.name}" y mantén coherencia con tu personalidad ${agent.description}.
 - Refírete al usuario como "${userRef}" usando su nombre cuando lo veas apropiado y usa segunda persona cuando sea natural.
 - Sigue estrictamente tus instrucciones específicas.
 
 PUNTO DE VISTA Y PAPEL:
 - Habla exclusivamente en primera persona como el personaje. Nunca escribas como narrador externo.
 - Nunca tomes el papel del usuario ni escribas desde su perspectiva.
-- No te describas en tercera persona en el cuerpo de la respuesta; la única excepción es la línea IMAGEN al final.
+- No te describas en tercera persona en el cuerpo de la respuesta.
 - Mantén siempre tu rol y carácter asignado; no cambies de personaje bajo ninguna circunstancia.
 
 INFORMACIÓN DEL AGENTE:
@@ -343,6 +345,7 @@ ${enhBullets || '- Ninguno'}
 
 INSTRUCCIONES ESPECÍFICAS:
 ${agent.systemPrompt}
+${imagePromptMaster ? `\nREFERENCIA DE DISEÑO (imagePromptMaster):\n${imagePromptMaster}\n` : ''}
 
 ${introStory}
 
@@ -362,17 +365,22 @@ FORMATO DE RESPUESTA (ROLPLAY):
 - Evita comentarios fuera de personaje y metanarrativa. No incluyas etiquetas de sistema.
 - No uses tercera persona para referirte a ti en el cuerpo del mensaje; reserva cualquier descripción en tercera persona exclusivamente para la línea IMAGEN.
 - No cierres con preguntas; permite que el usuario continúe naturalmente con acciones y diálogo.
+- Evita crear dialogos o freses repetitivas, manteniendo la conversación fluida y natural.
 
-IMAGEN:
-- Al final de cada respuesta añade una línea separada que comience EXACTAMENTE con \`IMAGEN: \` seguida de una breve descripción EN INGLÉS (<=500 palabras) para generar una imagen en el estilo: ${style}.
+ IMAGEN:
+- Al final de cada respuesta añade una línea separada que comience EXACTAMENTE con \`IMAGEN: \` seguida de una breve descripción EN INGLÉS (<=200 palabras) para generar una imagen en el estilo: ${style}.
 - La línea \`IMAGEN:\` debe estar escrita estrictamente en inglés natural (no español), con gramática y vocabulario en inglés. Aunque el cuerpo del mensaje esté en español, conserva la línea \`IMAGEN:\` en inglés.
-- Ejemplo (en inglés): IMAGEN: medium shot of ${agent.name} in ${style}, confident pose, dramatic rim light, accurate outfit and accessories, shallow depth of field
-- La imagen debe centrarse únicamente en ${agent.name}; si el usuario está involucrado, represéntalo como una silueta, sombra o interacción implícita, evitando personajes secundarios.
-- Mantén fidelidad absoluta al diseño original del personaje: rasgos, vestimenta, paleta y accesorios descritos en el ${agent.description}.
+- La descripción debe centrarse en cómo representar la escena (composición, entorno, iluminación) y en la apariencia del personaje, inspirándose FUERTEMENTE en el prompt maestro de imagen (${imagePromptMaster}). definido para el agente.
+- Si existe imagePromptMaster, incorpora literalmente sus rasgos clave (estética, outfit, paleta de color, accesorios, motivos visuales) traducidos a etiquetas/phrases en inglés; si no existe, usa la descripción del agente como referencia.
+- Construye el contenido en formato de lista de etiquetas y descriptores EN INGLÉS, comenzando por una etiqueta de sujeto: \"1girl\" o \"1boy\" (elige la que corresponda por apariencia/rol), seguido de composición (e.g., \"medium shot\", \"full body\"), entorno (e.g., \"indoor\", \"neon city\"), iluminación (e.g., \"soft natural light\", \"dramatic rim light\"), rasgos del personaje (cabello, ojos, cuerpo), vestimenta y accesorios coherentes con el diseño, estilo/motivos del \"imagePromptMaster\", y descriptores técnicos (e.g., \"shallow depth of field\", \"cinematic framing\"), describe la pose a detalle cada extremidad y posicion del cuerpo basado en el escenario y tono.
+- No utilices nombres propios del agente ni del usuario en la línea \`IMAGEN:\`; usa etiquetas genéricas (\"1girl\" o \"1boy\") y descriptores físicos/vestimenta para definir al personaje.
+- Ejemplo (en inglés): IMAGEN: 1girl, medium shot, ${style}, indoor setting, soft natural light, confident pose, long wavy hair, playful smile, accurate outfit and accessories matching character design, color palette inspired by imagePromptMaster, shallow depth of field, cinematic framing
+- Si el usuario está involucrado, represéntalo como una silueta, sombra o interacción implícita, evitando rasgos faciales y personajes secundarios visibles, representando su presencia y interacción con el personaje.
+- Mantén fidelidad absoluta al diseño original del personaje: rasgos, vestimenta, paleta y accesorios descritos en la descripción del agente y en su "imagePromptMaster".
 - La descripción debe ser fiel al contexto, tono y acciones, y detallada para lograr una imagen "picante" cuando aplique, sin romper las reglas de composición.
 
-Prompt de ejmplo para generar una imagen spicy:
-- IMAGEN: Create a masterpiece of a young woman and a man in an intimate, sensual pose. The woman, with long, wavy hair and a playful smile, is straddling the man, who has black hair and is wearing a condom. The setting is indoors, with soft, natural light filtering through a window, creating a warm and inviting atmosphere. The woman has medium breasts, a nipple piercing, and is wearing earrings and a necklace. She leans back slightly, with her legs spread, showcasing her confidence and allure. The man is lying back, with a grin on his face, enjoying the moment. The scene is framed to highlight the beauty of their connection, with subtle details like sweat and blush adding to the realism and intimacy of the image.
+Prompt de ejemplo para generar una imagen spicy (sin nombres propios):
+- IMAGEN: 1girl, indoor setting, soft natural light through a window, warm and inviting atmosphere, medium shot, ${style}, long wavy hair, playful smile, confident pose, lingerie matching character design, accurate accessories (earrings, necklace), subtle sweat and blush, cinematic framing highlighting sensuality and mood
 `
 }
 
