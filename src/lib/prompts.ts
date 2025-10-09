@@ -368,16 +368,14 @@ FORMATO DE RESPUESTA (ROLPLAY):
 - Evita crear dialogos o freses repetitivas, manteniendo la conversación fluida y natural.
 
  IMAGEN:
-- Al final de cada respuesta añade una línea separada que comience EXACTAMENTE con \`IMAGEN: \` seguida de una breve descripción EN INGLÉS (<=200 palabras) para generar una imagen en el estilo: ${style}.
-- La línea \`IMAGEN:\` debe estar escrita estrictamente en inglés natural (no español), con gramática y vocabulario en inglés. Aunque el cuerpo del mensaje esté en español, conserva la línea \`IMAGEN:\` en inglés.
-- La descripción debe centrarse en cómo representar la escena (composición, entorno, iluminación) y en la apariencia del personaje, inspirándose FUERTEMENTE en el prompt maestro de imagen (${imagePromptMaster}). definido para el agente.
-- Si existe imagePromptMaster, incorpora literalmente sus rasgos clave (estética, outfit, paleta de color, accesorios, motivos visuales) traducidos a etiquetas/phrases en inglés; si no existe, usa la descripción del agente como referencia.
-- Construye el contenido en formato de lista de etiquetas y descriptores EN INGLÉS, comenzando por una etiqueta de sujeto: \"1girl\" o \"1boy\" (elige la que corresponda por apariencia/rol), seguido de composición (e.g., \"medium shot\", \"full body\"), entorno (e.g., \"indoor\", \"neon city\"), iluminación (e.g., \"soft natural light\", \"dramatic rim light\"), rasgos del personaje (cabello, ojos, cuerpo), vestimenta y accesorios coherentes con el diseño, estilo/motivos del \"imagePromptMaster\", y descriptores técnicos (e.g., \"shallow depth of field\", \"cinematic framing\"), describe la pose a detalle cada extremidad y posicion del cuerpo basado en el escenario y tono.
-- No utilices nombres propios del agente ni del usuario en la línea \`IMAGEN:\`; usa etiquetas genéricas (\"1girl\" o \"1boy\") y descriptores físicos/vestimenta para definir al personaje.
-- Ejemplo (en inglés): IMAGEN: 1girl, medium shot, ${style}, indoor setting, soft natural light, confident pose, long wavy hair, playful smile, accurate outfit and accessories matching character design, color palette inspired by imagePromptMaster, shallow depth of field, cinematic framing
-- Si el usuario está involucrado, represéntalo como una silueta, sombra o interacción implícita, evitando rasgos faciales y personajes secundarios visibles, representando su presencia y interacción con el personaje.
-- Mantén fidelidad absoluta al diseño original del personaje: rasgos, vestimenta, paleta y accesorios descritos en la descripción del agente y en su "imagePromptMaster".
-- La descripción debe ser fiel al contexto, tono y acciones, y detallada para lograr una imagen "picante" cuando aplique, sin romper las reglas de composición.
+ - Al final de cada respuesta añade una línea que comience EXACTAMENTE con \`IMAGEN: \` seguida de UNA SOLA LÍNEA EN INGLÉS con etiquetas estilo booru, separadas por comas (sin frases).
+ - Usa sujetos genéricos: \`1girl\`, \`1boy\`, \`1person\`, \`2girls\`, \`2boys\`, \`couple\`, \`group\`; añade \`solo\` o \`couple\` según corresponda, y \`adult\` cuando aplique. Evita por completo nombres propios del agente o del usuario.
+ - Refleja fielmente el prompt maestro de imagen (${imagePromptMaster}) del agente: incorpora sus rasgos clave (estética, outfit, paleta de color, accesorios, motivos visuales) como etiquetas; si no existe, usa la descripción del agente.
+ - Enfócate en apariencia física: pelo (color/estilo/longitud), ojos (color/forma), tono de piel, tipo de cuerpo, rasgos faciales, tatuajes/cicatrices; añade vestimenta y accesorios coherentes con el diseño.
+ - Incluye pose y expresión; entorno/escena; composición; iluminación; mood; plano y ángulo (por ejemplo, \`cowboy shot\`, \`dutch angle\`). Opcionalmente agrega etiquetas de estilo relacionadas con ${style}.
+ - No uses comillas, dos puntos ni prefijos (por ejemplo, \`style:\`); sin números de cámara ni puntos finales. Evita duplicados. Longitud objetivo: 40–150 tokens.
+ - Ejemplo (no copies palabras, solo el formato): \`IMAGEN: 1girl, solo, adult, white hair, blue eyes, long ponytail, scar across eye, medium breasts, action pose, looking at viewer, smile, wind, indoors, flowers, standing, cowboy shot, window, curtains, bookshelf, hands on hips, morning, pajamas, short sleeves, nightgown, sleepwear, see-through clothes, no bra, no panties, dutch angle\`.
+ - La línea \`IMAGEN:\` debe permanecer en inglés aunque el resto del mensaje esté en español.
 
 Prompt de ejemplo para generar una imagen spicy (sin nombres propios):
 - IMAGEN: 1girl, indoor setting, soft natural light through a window, warm and inviting atmosphere, medium shot, ${style}, long wavy hair, playful smile, confident pose, lingerie matching character design, accurate accessories (earrings, necklace), subtle sweat and blush, cinematic framing highlighting sensuality and mood
