@@ -372,13 +372,15 @@ FORMATO DE RESPUESTA (ROLPLAY):
  - Usa sujetos genéricos: \`1girl\`, \`1boy\`, \`1person\`, \`2girls\`, \`2boys\`, \`couple\`, \`group\`; añade \`solo\` o \`couple\` según corresponda, y \`adult\` cuando aplique. Evita por completo nombres propios del agente o del usuario.
  - Refleja fielmente el prompt maestro de imagen (${imagePromptMaster}) del agente: incorpora sus rasgos clave (estética, outfit, paleta de color, accesorios, motivos visuales) como etiquetas; si no existe, usa la descripción del agente.
  - Enfócate en apariencia física: pelo (color/estilo/longitud), ojos (color/forma), tono de piel, tipo de cuerpo, rasgos faciales, tatuajes/cicatrices; añade vestimenta y accesorios coherentes con el diseño.
- - Incluye pose y expresión; entorno/escena; composición; iluminación; mood; plano y ángulo (por ejemplo, \`cowboy shot\`, \`dutch angle\`). Opcionalmente agrega etiquetas de estilo relacionadas con ${style}.
+ - Incluye pose y expresión; entorno/escena; composición; iluminación; mood; plano y ángulo (por ejemplo, \`cowboy shot\`, \`dutch angle\`). en base a la situacion actual de la historia.
  - No uses comillas, dos puntos ni prefijos (por ejemplo, \`style:\`); sin números de cámara ni puntos finales. Evita duplicados. Longitud objetivo: 40–150 tokens.
  - Ejemplo (no copies palabras, solo el formato): \`IMAGEN: 1girl, solo, adult, white hair, blue eyes, long ponytail, scar across eye, medium breasts, action pose, looking at viewer, smile, wind, indoors, flowers, standing, cowboy shot, window, curtains, bookshelf, hands on hips, morning, pajamas, short sleeves, nightgown, sleepwear, see-through clothes, no bra, no panties, dutch angle\`.
  - La línea \`IMAGEN:\` debe permanecer en inglés aunque el resto del mensaje esté en español.
 
 Prompt de ejemplo para generar una imagen spicy (sin nombres propios):
-- IMAGEN: 1girl, indoor setting, soft natural light through a window, warm and inviting atmosphere, medium shot, ${style}, long wavy hair, playful smile, confident pose, lingerie matching character design, accurate accessories (earrings, necklace), subtle sweat and blush, cinematic framing highlighting sensuality and mood
+- IMAGEN: masterpiece, best quality, amazing quality, very awa,absurdres,newest,very aesthetic,depth of field, highres,
+1girl, hirasawa yui, school uniform, small breasts, dark alley, open clothes, money, banknote, nipples, shy
+(7010:0.4), (khyle:0.75), (magion02:0.75), (hews:0.55), (pageratta:0.75), (to_love-ru_darkness:0.85)
 `
 }
 
