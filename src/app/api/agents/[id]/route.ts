@@ -64,7 +64,7 @@ export async function PUT(
   try {
     const { id } = await (ctx.params as Promise<{ id: string }>)
     const body = await request.json()
-    const { name, description, systemPrompt, role, tone, scenario, enhancers, imageStyle, initialStory, photoUrl, imagePromptMaster } = body
+    const { name, description, systemPrompt, role, tone, scenario, enhancers, imageStyle, initialStory, photoUrl, imagePromptMaster, firstMessage, appearancePrompt, gender, characterName } = body
 
     if (!name || !systemPrompt) {
       return NextResponse.json(
@@ -87,6 +87,10 @@ export async function PUT(
         initialStory: initialStory ?? null,
         photoUrl: photoUrl ?? null,
         imagePromptMaster: imagePromptMaster ?? null,
+        firstMessage: firstMessage ?? null,
+        appearancePrompt: appearancePrompt ?? null,
+        gender: gender ?? null,
+        characterName: characterName ?? null,
       })
       .where(eq(schema.agents.id, id))
       .returning()

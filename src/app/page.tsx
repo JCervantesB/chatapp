@@ -28,6 +28,7 @@ type AgentFormState = {
   name: string
   description: string
   initialStory?: string
+  firstMessage?: string
   systemPrompt: string
   role: string
   tone: string
@@ -37,6 +38,9 @@ type AgentFormState = {
   imagePromptMaster?: string
   photoUrl?: string
   sinkinModelId?: string
+  appearancePrompt?: string
+  gender?: string
+  characterName?: string
 }
 
 export default function Home() {
@@ -56,6 +60,7 @@ export default function Home() {
     name: '',
     description: '',
     initialStory: '',
+    firstMessage: '',
     systemPrompt: '',
     role: '',
     tone: '',
@@ -63,7 +68,10 @@ export default function Home() {
     enhancers: [] as string[],
     imageStyle: '',
     imagePromptMaster: '',
-    photoUrl: ''
+    photoUrl: '',
+    appearancePrompt: '',
+    gender: '',
+    characterName: ''
   })
   const [isCustomImageStyle, setIsCustomImageStyle] = useState(false)
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
@@ -153,6 +161,7 @@ export default function Home() {
           name: formData.name,
           description: formData.description,
           initialStory: (formData.initialStory || '').trim() || null,
+          firstMessage: (formData.firstMessage || '').trim() || null,
           systemPrompt: enhancedPrompt,
           role: formData.role || null,
           tone: formData.tone || null,
@@ -161,6 +170,9 @@ export default function Home() {
           imageStyle: (formData.imageStyle || '').trim() || null,
           imagePromptMaster: (formData.imagePromptMaster || '').trim() || null,
           photoUrl: (formData.photoUrl || '').trim() || null,
+          appearancePrompt: (formData.appearancePrompt || '').trim() || null,
+          gender: (formData.gender || '').trim() || null,
+          characterName: (formData.characterName || '').trim() || null,
         }),
       })
 
@@ -171,6 +183,7 @@ export default function Home() {
           name: '',
           description: '',
           initialStory: '',
+          firstMessage: '',
           systemPrompt: '',
           role: '',
           tone: '',
@@ -178,7 +191,10 @@ export default function Home() {
           enhancers: [],
           imageStyle: '',
           imagePromptMaster: '',
-          photoUrl: ''
+          photoUrl: '',
+          appearancePrompt: '',
+          gender: '',
+          characterName: ''
         })
         fetchAgents()
       } else {
@@ -277,6 +293,7 @@ export default function Home() {
           name: data.name,
           description: data.description || '',
           initialStory: data.initialStory || '',
+          firstMessage: data.firstMessage || '',
           systemPrompt: data.systemPrompt,
           role: data.role || '',
           tone: data.tone || '',
@@ -284,7 +301,10 @@ export default function Home() {
           enhancers: normalizeEnhancers(data.enhancers ?? null),
           imageStyle: data.imageStyle || '',
           imagePromptMaster: data.imagePromptMaster || '',
-          photoUrl: data.photoUrl || ''
+          photoUrl: data.photoUrl || '',
+          appearancePrompt: data.appearancePrompt || '',
+          gender: data.gender || '',
+          characterName: data.characterName || ''
         })
         const style = (data.imageStyle || '').trim()
         setIsCustomImageStyle(style.length > 0 && !presetImageStyles.includes(style))
@@ -322,6 +342,7 @@ export default function Home() {
           name: formData.name,
           description: formData.description,
           initialStory: (formData.initialStory || '').trim() || null,
+          firstMessage: (formData.firstMessage || '').trim() || null,
           systemPrompt: enhancedPrompt,
           role: formData.role || null,
           tone: formData.tone || null,
@@ -330,6 +351,9 @@ export default function Home() {
           imageStyle: (formData.imageStyle || '').trim() || null,
           imagePromptMaster: (formData.imagePromptMaster || '').trim() || null,
           photoUrl: (formData.photoUrl || '').trim() || null,
+          appearancePrompt: (formData.appearancePrompt || '').trim() || null,
+          gender: (formData.gender || '').trim() || null,
+          characterName: (formData.characterName || '').trim() || null,
         }),
       })
 
@@ -341,6 +365,7 @@ export default function Home() {
           name: '',
           description: '',
           initialStory: '',
+          firstMessage: '',
           systemPrompt: '',
           role: '',
           tone: '',
@@ -348,7 +373,10 @@ export default function Home() {
           enhancers: [],
           imageStyle: '',
           imagePromptMaster: '',
-          photoUrl: ''
+          photoUrl: '',
+          appearancePrompt: '',
+          gender: '',
+          characterName: ''
         })
         fetchAgents()
       } else {

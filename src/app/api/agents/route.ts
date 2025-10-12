@@ -29,7 +29,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, description, systemPrompt, role, tone, scenario, enhancers, imageStyle, initialStory, photoUrl, imagePromptMaster } = body
+    const { name, description, systemPrompt, role, tone, scenario, enhancers, imageStyle, initialStory, photoUrl, imagePromptMaster, firstMessage, appearancePrompt, gender, characterName } = body
 
     if (!name || !systemPrompt) {
       return NextResponse.json(
@@ -53,6 +53,10 @@ export async function POST(request: NextRequest) {
         initialStory: initialStory ?? null,
         photoUrl: photoUrl ?? null,
         imagePromptMaster: imagePromptMaster ?? null,
+        firstMessage: firstMessage ?? null,
+        appearancePrompt: appearancePrompt ?? null,
+        gender: gender ?? null,
+        characterName: characterName ?? null,
       })
       .returning()
 

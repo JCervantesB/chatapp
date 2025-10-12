@@ -87,6 +87,14 @@ export const agents = pgTable("agents", {
   imagePromptMaster: text("imagePromptMaster"),
   // Historia inicial para arrancar la narrativa del agente
   initialStory: text("initialStory"),
+  // Primer mensaje: escena inicial y primera frase del personaje
+  firstMessage: text("firstMessage"),
+  // Apariencia del personaje (prompt descriptivo)
+  appearancePrompt: text("appearancePrompt"),
+  // Género del personaje: 'male' | 'female' | 'other'
+  gender: text("gender"),
+  // Personaje opcional seleccionado desde la lista (nombre)
+  characterName: text("characterName"),
   createdAt: timestamp("createdAt", { mode: "string" }).default(sql`CURRENT_TIMESTAMP`).notNull(),
   updatedAt: timestamp("updatedAt", { mode: "string" }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 });

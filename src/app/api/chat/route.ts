@@ -21,7 +21,8 @@ export const runtime = 'nodejs'
 function sanitizeImagenLine(
   fullText: string,
   agentName: string,
-  userName?: string
+  userName?: string,
+  characterName?: string
 ): string {
   const lines = fullText.split('\n')
   let imagenIndex = -1
@@ -59,11 +60,12 @@ function sanitizeImagenLine(
     'teenager'
   ]
 
-  // Quitar nombres propios del agente y usuario
+  // Quitar nombres propios del agente y usuario, pero preservar characterName si existe
   const nameParts = [
     ...String(agentName || '').toLowerCase().split(/\s+/).filter(Boolean),
     ...String(userName || '').toLowerCase().split(/\s+/).filter(Boolean),
   ]
+  const characterTag = String(characterName || '').toLowerCase().trim()
 
   // Tokenizar por comas y limpiar
   let tokens = content
@@ -80,7 +82,11 @@ function sanitizeImagenLine(
 
   tokens = tokens.filter(t => !banned.some(b => t.includes(b)))
   if (nameParts.length) {
-    tokens = tokens.filter(t => !nameParts.some(np => np && t.includes(np)))
+    tokens = tokens.filter(t => {
+      // Preservar explícitamente el characterName si coincide exactamente
+      if (characterTag && t === characterTag) return true
+      return !nameParts.some(np => np && t.includes(np))
+    })
   }
 
   // Deduplicar tokens
@@ -174,7 +180,8 @@ function sanitizeImagenLine(
 // Deriva etiquetas IMAGEN coherentes a partir de la acción del bloque de rolplay
 function alignImagenWithAction(
   fullText: string,
-  imagePromptMaster?: string
+  imagePromptMaster?: string,
+  characterName?: string
 ): string {
   const lines = fullText.split('\n')
   // localizar IMAGEN
@@ -218,6 +225,11 @@ function alignImagenWithAction(
   // reforzar estética desde imagePromptMaster
   if (imagePromptMaster) {
     extractTraitsFromImagePromptMaster(imagePromptMaster).forEach(t => tags.push(t))
+  }
+
+  // Añadir el nombre del personaje si está definido (excepción de nombres propios)
+  if (characterName && characterName.trim().length > 0) {
+    tags.push(characterName.trim().toLowerCase())
   }
 
   // dedup y compactar etiquetas largas
@@ -362,7 +374,7 @@ function extractTraitsFromImagePromptMaster(master?: string): string[] {
 
 // Genera tags booru-style para IMAGEN desde el contexto del último intercambio
 function buildFallbackImagenFromContext(
-  params: { lastUser?: string; lastAssistant?: string; imagePromptMaster?: string }
+  params: { lastUser?: string; lastAssistant?: string; imagePromptMaster?: string; characterName?: string }
 ): string {
   const text = ((params.lastAssistant || '') + ' ' + (params.lastUser || '')).toLowerCase()
     .replace(/[\n\r]+/g, ' ')
@@ -397,6 +409,11 @@ function buildFallbackImagenFromContext(
 
   // Añadir rasgos del imagePromptMaster si existen
   extractTraitsFromImagePromptMaster(params.imagePromptMaster).forEach(t => tokens.push(t))
+
+  // Añadir el nombre del personaje si existe (permitido como excepción)
+  if (params.characterName && params.characterName.trim().length > 0) {
+    tokens.push(params.characterName.trim().toLowerCase())
+  }
 
   // Deduplicar y comprimir tokens largos (máx 3 palabras)
   const seen = new Set<string>()
@@ -504,6 +521,9 @@ export async function POST(request: NextRequest) {
       enhancers: agent.enhancers ?? null,
       initialStory: agent.initialStory ?? null,
       imagePromptMaster: agent.imagePromptMaster ?? null,
+      gender: agent.gender ?? null,
+      appearancePrompt: agent.appearancePrompt ?? null,
+      firstMessage: agent.firstMessage ?? null,
     }, userName)
 
     // Inyectar pista de contexto desde el último intercambio para orientar la escena
@@ -533,7 +553,7 @@ export async function POST(request: NextRequest) {
       }
       messages.push({
         role: 'user',
-        content: buildInitialUserInstruction(agent.name, agent.initialStory ?? null),
+        content: buildInitialUserInstruction(agent.name, agent.initialStory ?? null, userName),
       })
     }
 
@@ -578,15 +598,15 @@ export async function POST(request: NextRequest) {
       // Ensure IMAGEN line exists; if missing, append a sensible fallback in English
       const hasImageLine = /(^|\n)IMAGEN:\s*/.test(aiResponse)
       if (!hasImageLine) {
-        const fallbackTags = buildFallbackImagenFromContext({ lastUser, lastAssistant, imagePromptMaster: agent.imagePromptMaster ?? undefined })
+        const fallbackTags = buildFallbackImagenFromContext({ lastUser, lastAssistant, imagePromptMaster: agent.imagePromptMaster ?? undefined, characterName: agent.characterName ?? undefined })
         aiResponse = `${aiResponse}\nIMAGEN: ${fallbackTags}`
       }
 
       // Alinear IMAGEN con la acción del bloque, fortaleciendo coherencia y sugerencia sexual
-      aiResponse = alignImagenWithAction(aiResponse, agent.imagePromptMaster ?? undefined)
+      aiResponse = alignImagenWithAction(aiResponse, agent.imagePromptMaster ?? undefined, agent.characterName ?? undefined)
 
       // Post-proceso: sanitizar línea IMAGEN para cumplir reglas (sin nombres, sin términos prohibidos, <=100 palabras)
-      aiResponse = sanitizeImagenLine(aiResponse, agent.name, userName)
+      aiResponse = sanitizeImagenLine(aiResponse, agent.name, userName, agent.characterName ?? undefined)
 
       // Save AI response
       await db.insert(schema.chatMessages).values({
@@ -688,7 +708,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Sanitizar la línea IMAGEN para cumplir reglas (sin nombres, sin términos prohibidos, límite palabras)
-    const sanitized = sanitizeImagenLine(updatedText, agent.name, userName)
+    const sanitized = sanitizeImagenLine(updatedText, agent.name, userName, agent.characterName ?? undefined)
 
     await db
       .update(schema.chatMessages)
