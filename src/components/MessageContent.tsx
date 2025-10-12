@@ -62,6 +62,13 @@ export function MessageContent({ content, isAgent, agentId, messageId, onRefresh
   const [editedPrompt, setEditedPrompt] = useState('')
   const [isTagDialogOpen, setIsTagDialogOpen] = useState(false)
 
+  // Analizar contenido para obtener coincidencias de IMAGEN antes de usar cleanPrompt
+  const imageUrlMatch = content.match(/IMAGEN_URL:\s*(https?:\/\/\S+)/i)
+  const imagenMatch = content.match(/([\s\S]*?)(\nIMAGEN:\s*)([\s\S]*)/)
+  const beforeImagen = imagenMatch ? imagenMatch[1] : ''
+  const cleanPrompt = imagenMatch ? imagenMatch[3].trim() : ''
+  const canEditPrompt = Boolean(isAgent && messageId)
+
   // Utilidades de prompt y etiquetas
   const parsePromptTokens = useCallback((value: string) => {
     return value
@@ -177,12 +184,6 @@ export function MessageContent({ content, isAgent, agentId, messageId, onRefresh
     return <p className="text-sm whitespace-pre-wrap">{content}</p>
   }
 
-  // Detectar si el mensaje contiene una URL de imagen guardada
-  const imageUrlMatch = content.match(/IMAGEN_URL:\s*(https?:\/\/\S+)/i)
-
-  // Buscar el bloque IMAGEN en el contenido (prompt)
-  const imagenMatch = content.match(/([\s\S]*?)(\nIMAGEN:\s*)([\s\S]*)/)
-  
   // Si hay una imagen guardada en el mensaje, mostrar tarjeta con botón de mostrar/ocultar
   if (imageUrlMatch) {
     const imageUrl = imageUrlMatch[1]
@@ -220,10 +221,6 @@ export function MessageContent({ content, isAgent, agentId, messageId, onRefresh
     // No hay bloque IMAGEN ni URL, renderizar con formato
     return renderFormattedContent(content)
   }
-
-  const [, beforeImagen, imagenLabel, imagePrompt] = imagenMatch
-  const cleanPrompt = imagePrompt.trim()
-  const canEditPrompt = Boolean(isAgent && messageId)
 
   const openEditPrompt = () => {
     setEditedPrompt(cleanPrompt)
